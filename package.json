@@ -1,0 +1,48 @@
+{
+  "name": "html-diff",
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext ts src",
+    "test": "jest",
+    "test-coverage": "jest --coverage",
+    "build": "node scripts/build.mjs",
+    "release": "node scripts/release.mjs"
+  },
+  "lint-staged": {
+    "*.ts": "eslint"
+  },
+  "dependencies": {
+    "vue": "^3.2.37"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.28.6",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@rollup/plugin-typescript": "^8.3.4",
+    "@types/jest": "^28.1.6",
+    "@types/node": "^18.6.3",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "chalk": "^5.0.1",
+    "cssnano": "^5.1.12",
+    "enquirer": "^2.3.6",
+    "eslint": "^8.20.0",
+    "fs-extra": "^10.1.0",
+    "husky": "^8.0.1",
+    "jest": "^28.1.3",
+    "lint-staged": "^13.0.3",
+    "postcss": "^8.4.14",
+    "postcss-nested": "^5.0.6",
+    "postcss-preset-env": "^7.7.2",
+    "rollup": "^2.77.2",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-terser": "^7.0.2",
+    "semver": "^7.3.7",
+    "ts-jest": "^28.0.7",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
