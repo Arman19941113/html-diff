@@ -1,8 +1,10 @@
 {
   "name": "@armantang/html-diff",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Generate html content diff",
-  "keywords": ["html-diff"],
+  "keywords": [
+    "html-diff"
+  ],
   "homepage": "https://github.com/Arman19941113/html-diff#readme",
   "license": "MIT",
   "author": "Arman19941113",
