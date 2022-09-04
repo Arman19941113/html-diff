@@ -1,29 +1,24 @@
-import fs from 'fs'
-import path from 'path'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
 import rollupPostcss from 'rollup-plugin-postcss'
-import postcssPresetEnv from 'postcss-preset-env'
 import postcssNested from 'postcss-nested'
 import cssnano from 'cssnano'
 
-const npmPkgPath = path.resolve('package.npm.json')
-const npmPkg = JSON.parse(fs.readFileSync(npmPkgPath, 'utf-8'))
-const pkgName = npmPkg.name
-const outputName = pkgName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
-
-const devTasks = {
+const bundlerTasks = {
   input: 'src/index.ts',
-  external: ['vue'],
+  output: {
+    file: 'dist/index.esm-bundler.js',
+    format: 'es',
+  },
+  plugins: [
+    typescript(),
+  ],
+}
+
+const normalTasks = {
+  input: 'src/index.ts',
   output: [
-    {
-      name: outputName,
-      file: 'dist/index.global.js',
-      format: 'iife',
-      globals: { vue: 'Vue' },
-    },
     {
       file: 'dist/index.cjs.js',
       format: 'cjs',
@@ -34,38 +29,28 @@ const devTasks = {
     },
   ],
   plugins: [
-    nodeResolve(),
-    typescript(),
+    typescript({
+      compilerOptions: {
+        removeComments: true,
+      },
+    }),
     replace({
       preventAssignment: true,
       values: {
-        'process.env.NODE_ENV': JSON.stringify('development'),
+        'process.env.NODE_ENV': JSON.stringify('production'),
       },
     }),
   ],
 }
 
-const prodTasks = {
+const iifeTasks = {
   input: 'src/index.ts',
-  external: ['vue'],
-  output: [
-    {
-      name: outputName,
-      file: 'dist/index.global.prod.js',
-      format: 'iife',
-      globals: { vue: 'Vue' },
-    },
-    {
-      file: 'dist/index.cjs.prod.js',
-      format: 'cjs',
-    },
-    {
-      file: 'dist/index.esm.prod.js',
-      format: 'es',
-    },
-  ],
+  output: {
+    name: 'HtmlDiff',
+    file: 'dist/index.iife.js',
+    format: 'iife',
+  },
   plugins: [
-    nodeResolve(),
     typescript(),
     replace({
       preventAssignment: true,
@@ -88,9 +73,6 @@ const styleTask = {
       extract: true,
       plugins: [
         postcssNested,
-        postcssPresetEnv({
-          stage: 0,
-        }),
         cssnano,
       ],
     }),
@@ -98,7 +80,8 @@ const styleTask = {
 }
 
 export default [
-  devTasks,
-  prodTasks,
+  bundlerTasks,
+  normalTasks,
+  iifeTasks,
   styleTask,
 ]

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Html Diff</title>
+    <link href="https://unpkg.com/@armantang/html-diff/dist/index.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <div class="input-container">
+        <label for="oldHtml">oldHtml:</label>
+        <textarea cols="50" id="oldHtml" rows="20">
+          <h1>Hello</h1>
+          <h2>Let life be beautiful like summer flower and death like autumn leaves.</h2>
+          <p>She could fade and wither- I didn't care. I would still go mad with tenderness at the mere sight of her face.</p>
+          <p>她可以褪色，可以枯萎，怎样都可以。但只要我看她一眼，万般柔情便涌上心头。</p>
+          <p>夜已深 我心思思 你的丰姿</p>
+          <p>只想你便是 我的天使</p>
+          <p>未见半秒 便控制不了</p>
+          <p>难以心安 于今晚</p>
+          <img src="./dog.jpg" alt="dog">
+          <h2>Try video</h2>
+          <video style="width: 100%;" controls>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+          </video>
+        </textarea>
+        <label for="newHtml">newHtml:</label>
+        <textarea cols="50" id="newHtml" rows="20">
+          <h1>Hello World</h1>
+          <p>She could fade and wither. I would still go mad with tenderness at the mere sight of her face.</p>
+          <p>她可以褪色，可以枯萎。但只要我看她一眼，万般柔情便涌上了我的心头。</p>
+          <p>让我靠着你的臂胳</p>
+          <p>流露我热爱心底说话</p>
+          <p>孕育美丽温馨爱意</p>
+          <p>做梦 都是你</p>
+          <img src="./cat.jpg" alt="cat">
+          <h2>Try video</h2>
+          <h2>Set the bird's wings with gold and it will never again soar in the sky.</h2>
+          <video style="width: 100%;" controls src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"></video>
+        </textarea>
+      </div>
+
+      <div class="output-container">
+        <div class="button-container">
+          <button id="button1">getUnifiedContent</button>
+          <button id="button2">getSideBySideContents</button>
+        </div>
+
+        <div class="unified-content-container" id="unified-content-container"></div>
+
+        <div class="side-by-side-content-container" id="side-by-side-content-container">
+          <div class="side-by-side-content-left" id="side-by-side-content-left"></div>
+          <div class="side-by-side-content-right" id="side-by-side-content-right"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import HtmlDiff from 'https://unpkg.com/@armantang/html-diff/dist/index.esm.js'
+
+      const oldHtmlInput = document.getElementById('oldHtml')
+      const newHtmlInput = document.getElementById('newHtml')
+      const button1 = document.getElementById('button1')
+      const button2 = document.getElementById('button2')
+      const unifiedContentContainer = document.getElementById('unified-content-container')
+      const sideBySideContentContainer = document.getElementById('side-by-side-content-container')
+      const sideBySideContentLeft = document.getElementById('side-by-side-content-left')
+      const sideBySideContentRight = document.getElementById('side-by-side-content-right')
+
+      let type = 'unified'
+      button1.onclick = () => {
+        type = 'unified'
+        renderUnifiedContent()
+      }
+      button2.onclick = () => {
+        type = 'sideBySide'
+        renderSideBySideContents()
+      }
+      function renderUnifiedContent() {
+        unifiedContentContainer.removeAttribute('style')
+        sideBySideContentContainer.setAttribute('style', 'display: none')
+      }
+      function renderSideBySideContents() {
+        unifiedContentContainer.setAttribute('style', 'display: none')
+        sideBySideContentContainer.removeAttribute('style')
+      }
+
+      function main() {
+        const oldHtml = oldHtmlInput.value
+        const newHtml = newHtmlInput.value
+
+        const diff = new HtmlDiff(oldHtml, newHtml, 3)
+        console.log(diff)
+        const unifiedContent = diff.getUnifiedContent()
+        const sideBySideContents = diff.getSideBySideContents()
+
+        unifiedContentContainer.innerHTML = unifiedContent
+        sideBySideContentLeft.innerHTML = sideBySideContents[0]
+        sideBySideContentRight.innerHTML = sideBySideContents[1]
+
+        if (type === 'unified') {
+          renderUnifiedContent()
+        } else {
+          renderSideBySideContents()
+        }
+      }
+
+      function debounce(callbackFn, wait = 300) {
+        let timer = null
+        const listener = function(listenerArgument = undefined) {
+          if (timer)
+            clearTimeout(timer)
+          timer = setTimeout(() => {
+            timer = null
+            callbackFn.call(this, listenerArgument)
+          }, wait)
+        }
+        listener.cancel = function() {
+          if (timer) {
+            clearTimeout(timer)
+            timer = null
+            return true
+          }
+          return false
+        }
+        return listener
+      }
+      const listener = debounce(main)
+
+      oldHtmlInput.oninput = listener
+      newHtmlInput.oninput = listener
+      main()
+    </script>
+  </body>
+</html>

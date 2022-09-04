@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#app {
+  display: flex;
+  height: 100%;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  height: 100%;
+  padding: 10px;
+  border-right: 1px solid;
+}
+
+.button-container {
+  margin-bottom: 20px;
+}
+
+button {
+  margin-right: 20px;
+}
+
+.output-container {
+  flex: 1;
+  padding: 10px 20px;
+}
+
+.unified-content-container {
+  overflow: auto;
+  width: 100%;
+  height: calc(100% - 50px);
+  padding: 10px;
+  border: 1px solid #CCC;
+}
+
+.side-by-side-content-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(100% - 50px);
+
+}
+
+.side-by-side-content-left, .side-by-side-content-right {
+  overflow: auto;
+  width: 49%;
+  height: 100%;
+  padding: 10px;
+  border: 1px solid #CCC;
+}
+
+img {
+  width: 200px;
+}

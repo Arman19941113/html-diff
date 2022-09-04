@@ -1,14 +1,14 @@
 {
-  "name": "html-diff",
+  "name": "@armantang/html-diff",
   "version": "0.0.0",
-  "description": "",
-  "keywords": [],
-  "homepage": "",
+  "description": "Generate html content diff",
+  "keywords": ["html-diff"],
+  "homepage": "https://github.com/Arman19941113/html-diff#readme",
   "license": "MIT",
-  "author": "",
+  "author": "Arman19941113",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Arman19941113/html-diff"
   },
   "files": [
     "dist"
@@ -20,9 +20,6 @@
   },
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "peerDependencies": {
-    "vue": "^3.2.0"
-  },
   "engines": {
     "node": ">=14"
   }

@@ -15,14 +15,11 @@ module.exports = {
     browser: true,
     node: true,
   },
-  globals: {
-    defineProps: 'readonly',
-    defineEmits: 'readonly',
-    defineExpose: 'readonly',
-    withDefaults: 'readonly',
-  },
+  globals: {},
+  ignorePatterns: ['dist'],
   rules: {
-    "indent": ["error", 2],
+    'indent': ['error', 2],
+    'no-case-declarations': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error', {
         'ts-expect-error': 'allow-with-description',
@@ -32,5 +29,6 @@ module.exports = {
         minimumDescriptionLength: 1,
       },
     ],
+    '@typescript-eslint/no-non-null-assertion': 'off',
   },
 }
