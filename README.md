@@ -2,13 +2,13 @@
 
 Generate html content unified or side-by-side differences.
 
-## INSTALL
+## Install
 
 ```
 pnpm add @armantang/html-diff
 ```
 
-## QUICK START
+## Quick Start
 
 ```js
 import '@armantang/html-diff/dist/index.css'
@@ -22,13 +22,13 @@ const unifiedContent = diff.getUnifiedContent()
 const sideBySideContents = diff.getSideBySideContents()
 ```
 
-## PREVIEW
+## Preview
 
 ### unified differences
 
-![home](./example/unified.png)
+![home](https://arman19941113.github.io/html-diff//unified.png)
 
 ### side-by-side differences
 
-![home](./example/sidebyside.png)
+![home](https://arman19941113.github.io/html-diff//sidebyside.png)
 
