@@ -21,8 +21,5 @@
     "./*": "./*"
   },
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
-  "engines": {
-    "node": ">=14"
-  }
+  "types": "dist/index.d.ts"
 }
