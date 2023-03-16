@@ -26,9 +26,9 @@ const sideBySideContents = diff.getSideBySideContents()
 
 ### unified differences
 
-![home](https://arman19941113.github.io/html-diff//unified.png)
+![home](https://arman19941113.github.io/html-diff/unified.png)
 
 ### side-by-side differences
 
-![home](https://arman19941113.github.io/html-diff//sidebyside.png)
+![home](https://arman19941113.github.io/html-diff/sidebyside.png)
 

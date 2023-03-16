@@ -1,22 +1,40 @@
-import typescript from '@rollup/plugin-typescript'
 import replace from '@rollup/plugin-replace'
-import { terser } from 'rollup-plugin-terser'
+import typescript from '@rollup/plugin-typescript'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import terser from '@rollup/plugin-terser'
+
 import rollupPostcss from 'rollup-plugin-postcss'
+import postcssPresetEnv from 'postcss-preset-env'
 import postcssNested from 'postcss-nested'
 import cssnano from 'cssnano'
 
-const bundlerTasks = {
+const plugins = [
+  replace({
+    preventAssignment: true,
+    values: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    },
+  }),
+  typescript({
+    compilerOptions: {
+      removeComments: true,
+    },
+  }),
+  nodeResolve(),
+]
+
+const browserTask = {
   input: 'src/index.ts',
   output: {
-    file: 'dist/index.esm-bundler.js',
-    format: 'es',
+    name: 'HtmlDiff',
+    file: 'dist/index.global.js',
+    format: 'iife',
+    plugins: [terser()],
   },
-  plugins: [
-    typescript(),
-  ],
+  plugins,
 }
 
-const normalTasks = {
+const jsTasks = {
   input: 'src/index.ts',
   output: [
     {
@@ -28,41 +46,10 @@ const normalTasks = {
       format: 'es',
     },
   ],
-  plugins: [
-    typescript({
-      compilerOptions: {
-        removeComments: true,
-      },
-    }),
-    replace({
-      preventAssignment: true,
-      values: {
-        'process.env.NODE_ENV': JSON.stringify('production'),
-      },
-    }),
-  ],
+  plugins,
 }
 
-const iifeTasks = {
-  input: 'src/index.ts',
-  output: {
-    name: 'HtmlDiff',
-    file: 'dist/index.iife.js',
-    format: 'iife',
-  },
-  plugins: [
-    typescript(),
-    replace({
-      preventAssignment: true,
-      values: {
-        'process.env.NODE_ENV': JSON.stringify('production'),
-      },
-    }),
-    terser(),
-  ],
-}
-
-const styleTask = {
+const cssTask = {
   input: 'src/index.css',
   output: {
     file: 'dist/index.css',
@@ -73,6 +60,9 @@ const styleTask = {
       extract: true,
       plugins: [
         postcssNested,
+        postcssPresetEnv({
+          stage: 0,
+        }),
         cssnano,
       ],
     }),
@@ -80,8 +70,7 @@ const styleTask = {
 }
 
 export default [
-  bundlerTasks,
-  normalTasks,
-  iifeTasks,
-  styleTask,
+  browserTask,
+  jsTasks,
+  cssTask,
 ]

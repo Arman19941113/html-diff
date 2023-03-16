@@ -98,15 +98,9 @@ parsedPkgJson.version = targetVersion
 fs.writeFileSync(publishPkgPath, JSON.stringify(parsedPkgJson, null, 2) + '\n')
 fs.renameSync(projectPkgPath, temporaryPath)
 fs.renameSync(publishPkgPath, projectPkgPath)
-try {
-  run(`npm publish . --access public --tag ${tag}`)
-} catch (e) {
-  errorLog(e.message)
-  process.exit()
-} finally {
-  fs.renameSync(projectPkgPath, publishPkgPath)
-  fs.renameSync(temporaryPath, projectPkgPath)
-}
+run(`npm publish . --access public --tag ${tag}`)
+fs.renameSync(projectPkgPath, publishPkgPath)
+fs.renameSync(temporaryPath, projectPkgPath)
 
 // Commit changes to the Git.
 stepLog('\nCommitting changes...')
