@@ -1,6 +1,6 @@
 # Html Diff
 
-Generate html content unified or side-by-side differences.
+Generate HTML content with unified or side-by-side differences.
 
 ## Install
 
