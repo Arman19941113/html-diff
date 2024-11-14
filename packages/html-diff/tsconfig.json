@@ -14,11 +14,7 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "allowUnreachableCode": false,
-    "lib": ["esnext", "dom"],
-    "jsx": "preserve",
-    "rootDir": ".",
-    "baseUrl": ".",
-    "paths": { }
+    "removeComments": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.test.ts"]
 }

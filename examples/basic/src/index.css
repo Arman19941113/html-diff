@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased;
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  .container-yellow {
+    background: linear-gradient(to bottom, #FFF9, transparent),
+    url("./assets/texture.png") rgba(192, 188, 163, 0.9);
+  }
+}

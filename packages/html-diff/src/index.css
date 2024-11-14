@@ -9,12 +9,23 @@
 }
 
 .html-diff-create-inline-wrapper,
+.html-diff-delete-inline-wrapper {
+  display: inline-flex;
+}
+
+.html-diff-create-block-wrapper,
+.html-diff-delete-block-wrapper {
+  display: flex;
+}
+
+.html-diff-create-inline-wrapper,
 .html-diff-delete-inline-wrapper,
 .html-diff-create-block-wrapper,
 .html-diff-delete-block-wrapper {
   position: relative;
   align-items: center;
   flex-direction: row;
+
   &::after {
     position: absolute;
     top: 0;
@@ -23,25 +34,6 @@
     width: 100%;
     height: 100%;
     content: "";
-  }
-  .html-diff-close-icon {
-    &::before,
-    &::after {
-      position: absolute;
-      top: calc(50% - 17px);
-      left: 50%;
-      width: 4px;
-      height: 34px;
-      content: '';
-      border-radius: 2px;
-      background-color: #7B2CCF;
-    }
-    &::before {
-      transform: rotate(45deg);
-    }
-    &::after {
-      transform: rotate(-45deg);
-    }
   }
 }
 
@@ -53,15 +45,4 @@
 .html-diff-delete-inline-wrapper::after,
 .html-diff-delete-block-wrapper::after {
   background: rgba(222, 207, 227, 0.7);
-}
-
-.html-diff-create-block-wrapper,
-.html-diff-delete-block-wrapper {
-  display: flex;
-  width: 100%;
-}
-
-.html-diff-create-inline-wrapper,
-.html-diff-delete-inline-wrapper {
-  display: inline-flex;
 }

@@ -1,4 +1,4 @@
-type Operation = 'delete' | 'create';
+type Operation = 'delete' | 'create'
 
 export const htmlTagReg = /^<[^>]+>/
 export const htmlImgTagReg = /^<img[^>]*>$/
@@ -10,7 +10,6 @@ export const createBlockClass = 'html-diff-create-block-wrapper'
 export const deleteBlockClass = 'html-diff-delete-block-wrapper'
 export const createInlineClass = 'html-diff-create-inline-wrapper'
 export const deleteInlineClass = 'html-diff-delete-inline-wrapper'
-export const closeIcon = `<span class="html-diff-close-icon"></span>`
 
 export function dressUpDiffContent(type: Operation, words: string[]): string {
   const wordsLength = words.length
@@ -32,7 +31,7 @@ export function dressUpDiffContent(type: Operation, words: string[]): string {
       textStartIndex = i + 1
       if (word.match(htmlVideoTagReg)) {
         result += dressUpBlockTag(type, word)
-      } else if ([htmlImgTagReg].some((item) => word.match(item))) {
+      } else if ([htmlImgTagReg].some(item => word.match(item))) {
         result += dressUpInlineTag(type, word)
       } else {
         result += word
@@ -55,12 +54,12 @@ function dressUpText(type: Operation, words: string[]): string {
 
 function dressUpInlineTag(type: Operation, word: string): string {
   if (type === 'create') return `<span class="${createInlineClass}">${word}</span>`
-  if (type === 'delete') return `<span class="${deleteInlineClass}">${word}${closeIcon}</span>`
+  if (type === 'delete') return `<span class="${deleteInlineClass}">${word}</span>`
   return ''
 }
 
 function dressUpBlockTag(type: Operation, word: string): string {
   if (type === 'create') return `<div class="${createBlockClass}">${word}</div>`
-  if (type === 'delete') return `<div class="${deleteBlockClass}">${word}${closeIcon}</div>`
+  if (type === 'delete') return `<div class="${deleteBlockClass}">${word}</div>`
   return ''
 }
