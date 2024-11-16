@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import fs from 'fs-extra'
+import fs from 'fs'
 import path from 'path'
 
 const run = command => execSync(command, { stdio: 'inherit' })
@@ -9,14 +9,14 @@ const outDir = resolve('dist-ts')
 const c = path.join(import.meta.dirname, 'rollup.config.mjs')
 const distDir = resolve('dist')
 
-await fs.remove(distDir)
+fs.rmSync(distDir, { recursive: true, force: true })
 run(`tsc -p ${p} --outDir ${outDir} -d --emitDeclarationOnly`)
 run(`rollup -c ${c}`)
-await fs.remove(outDir)
+fs.rmSync(outDir, { recursive: true, force: true })
 
 process.on('exit', exitCode => {
   if (exitCode === 1) {
-    fs.removeSync(distDir)
-    fs.removeSync(outDir)
+    fs.rmSync(distDir, { recursive: true, force: true })
+    fs.rmSync(outDir, { recursive: true, force: true })
   }
 })

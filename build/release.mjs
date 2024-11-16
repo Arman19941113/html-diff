@@ -103,7 +103,13 @@ run('pnpm run build')
 stepLog('\nPublishing the package...')
 pkgJson.version = targetVersion
 fs.writeFileSync(pkgPath, JSON.stringify(pkgJson, null, 2) + '\n')
+const readme = path.join(import.meta.dirname, '../README.md')
+const license = path.join(import.meta.dirname, '../LICENSE')
+fs.copyFileSync(readme, resolve('README.md'))
+fs.copyFileSync(license, resolve('LICENSE'))
 run(`cd packages/html-diff && npm publish . --access public --tag ${tag}`)
+fs.rmSync(resolve('README.md'))
+fs.rmSync(resolve('LICENSE'))
 
 // Commit changes to the Git.
 stepLog('\nCommitting changes...')
