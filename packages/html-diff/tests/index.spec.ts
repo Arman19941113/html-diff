@@ -55,7 +55,17 @@ describe('HtmlDiff', () => {
 <h2>Set the bird's wings with gold and it will never again soar in the sky.</h2>
 <video style="width: 100%;" controls src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"></video>`
 
-    const diff = new HtmlDiff(oldHtml, newHtml, 3)
+    const diff = new HtmlDiff(oldHtml, newHtml, {
+      minMatchedSize: 3,
+      classNames: {
+        createText: 'cra-txt',
+        deleteText: 'del-txt',
+        createInline: 'cra-inl',
+        deleteInline: 'del-inl',
+        createBlock: 'cra-blo',
+        deleteBlock: 'del-blo',
+      },
+    })
     expect(diff.getUnifiedContent()).toMatchSnapshot()
     expect(diff.getSideBySideContents()).toMatchSnapshot()
   })
@@ -78,7 +88,16 @@ describe('HtmlDiff', () => {
 <p>只有当你离开自己的舒适区时，你才会挑战自己的极限。</p>
 <p>一本有价值的书就是一盏智慧之灯，总有人不断从中提取光明。</p>`
 
-    const diff = new HtmlDiff(oldHtml, newHtml)
+    const diff = new HtmlDiff(oldHtml, newHtml, {
+      classNames: {
+        createText: 'cra-txt',
+        deleteText: 'del-txt',
+        createInline: 'cra-inl',
+        deleteInline: 'del-inl',
+        createBlock: 'cra-blo',
+        deleteBlock: 'del-blo',
+      },
+    })
     expect(diff.getUnifiedContent()).toMatchSnapshot()
     expect(diff.getSideBySideContents()).toMatchSnapshot()
   })

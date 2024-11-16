@@ -1,4 +1,4 @@
-export interface MatchedBlock {
+interface MatchedBlock {
   oldStart: number
   oldEnd: number
   newStart: number
@@ -6,7 +6,7 @@ export interface MatchedBlock {
   size: number
 }
 
-export interface Operation {
+interface Operation {
   oldStart: number
   oldEnd: number
   newStart: number
@@ -14,29 +14,78 @@ export interface Operation {
   type: 'equal' | 'delete' | 'create' | 'replace'
 }
 
-import {
-  dressUpDiffContent,
-  htmlImgTagReg,
-  htmlTagReg,
-  htmlVideoTagReg,
-} from './dress-up'
+type BaseOpType = 'delete' | 'create'
+
+interface HtmlDiffConfig {
+  minMatchedSize: number
+  classNames: {
+    createText: string
+    deleteText: string
+    createInline: string
+    deleteInline: string
+    createBlock: string
+    deleteBlock: string
+  }
+}
+
+export interface HtmlDiffOptions {
+  minMatchedSize?: number
+  classNames?: Partial<{
+    createText?: string
+    deleteText?: string
+    createInline?: string
+    deleteInline?: string
+    createBlock?: string
+    deleteBlock?: string
+  }>
+}
 
 const htmlStartTagReg = /^<(?<name>[^\s/>]+)[^>]*>$/
 const htmlTagWithNameReg = /^<(?<isEnd>\/)?(?<name>[^\s>]+)[^>]*>$/
 
+const htmlTagReg = /^<[^>]+>/
+const htmlImgTagReg = /^<img[^>]*>$/
+const htmlVideoTagReg = /^<video[^>]*>.*?<\/video>$/ms
+
 export default class HtmlDiff {
-  minMatchedSize: number
-  readonly oldWords: string[] = []
-  readonly newWords: string[] = []
-  readonly matchedBlockList: MatchedBlock[] = []
-  readonly operationList: Operation[] = []
+  private readonly config: HtmlDiffConfig
+  private readonly oldWords: string[] = []
+  private readonly newWords: string[] = []
+  private readonly matchedBlockList: MatchedBlock[] = []
+  private readonly operationList: Operation[] = []
+  private unifiedContent?: string
+  private sideBySideContents?: [string, string]
 
-  unifiedContent?: string
-  sideBySideContents?: string[]
+  constructor(
+    oldHtml: string,
+    newHtml: string,
+    {
+      minMatchedSize = 2,
+      classNames = {
+        createText: 'html-diff-create-text-wrapper',
+        deleteText: 'html-diff-delete-text-wrapper',
+        createInline: 'html-diff-create-inline-wrapper',
+        deleteInline: 'html-diff-delete-inline-wrapper',
+        createBlock: 'html-diff-create-block-wrapper',
+        deleteBlock: 'html-diff-delete-block-wrapper',
+      },
+    }: HtmlDiffOptions = {},
+  ) {
+    // init config
+    this.config = {
+      minMatchedSize,
+      classNames: {
+        createText: 'html-diff-create-text-wrapper',
+        deleteText: 'html-diff-delete-text-wrapper',
+        createInline: 'html-diff-create-inline-wrapper',
+        deleteInline: 'html-diff-delete-inline-wrapper',
+        createBlock: 'html-diff-create-block-wrapper',
+        deleteBlock: 'html-diff-delete-block-wrapper',
+        ...classNames,
+      },
+    }
 
-  constructor(oldHtml: string, newHtml: string, minMatchedSize = 2) {
-    this.minMatchedSize = minMatchedSize
-
+    // no need to diff
     if (oldHtml === newHtml) {
       this.unifiedContent = oldHtml
       this.sideBySideContents = [oldHtml, newHtml]
@@ -66,13 +115,13 @@ export default class HtmlDiff {
           }
           break
         case 'delete':
-          result += dressUpDiffContent(
+          result += this.dressUpDiffContent(
             'delete',
             this.oldWords.slice(operation.oldStart, operation.oldEnd),
           )
           break
         case 'create':
-          result += dressUpDiffContent(
+          result += this.dressUpDiffContent(
             'create',
             this.newWords.slice(operation.newStart, operation.newEnd),
           )
@@ -119,7 +168,7 @@ export default class HtmlDiff {
               }
 
               // deal normal tag
-              result += dressUpDiffContent('delete', deleteOfWords)
+              result += this.dressUpDiffContent('delete', deleteOfWords)
               deleteOfWords.splice(0)
               let isTagInNewFind = false
               for (
@@ -136,7 +185,7 @@ export default class HtmlDiff {
                 ) {
                   // find first matched tag, but not maybe the expected tag(to optimize)
                   isTagInNewFind = true
-                  result += dressUpDiffContent('create', createOfWords)
+                  result += this.dressUpDiffContent('create', createOfWords)
                   result += createWord
                   createOfWords.splice(0)
                   createIndex = tempCreateIndex + 1
@@ -157,8 +206,8 @@ export default class HtmlDiff {
           if (createIndex < operation.newEnd) {
             createOfWords.push(...this.newWords.slice(createIndex, operation.newEnd))
           }
-          result += dressUpDiffContent('delete', deleteOfWords)
-          result += dressUpDiffContent('create', createOfWords)
+          result += this.dressUpDiffContent('delete', deleteOfWords)
+          result += this.dressUpDiffContent('create', createOfWords)
           break
         default:
           const exhaustiveCheck: never = operation.type
@@ -198,23 +247,23 @@ export default class HtmlDiff {
           break
         case 'delete':
           const deleteWords = this.oldWords.slice(operation.oldStart, operation.oldEnd)
-          oldHtml += dressUpDiffContent('delete', deleteWords)
+          oldHtml += this.dressUpDiffContent('delete', deleteWords)
           break
         case 'create':
           const createWords = this.newWords.slice(operation.newStart, operation.newEnd)
-          newHtml += dressUpDiffContent('create', createWords)
+          newHtml += this.dressUpDiffContent('create', createWords)
           break
         case 'replace':
           const deleteOfReplaceWords = this.oldWords.slice(
             operation.oldStart,
             operation.oldEnd,
           )
-          oldHtml += dressUpDiffContent('delete', deleteOfReplaceWords)
+          oldHtml += this.dressUpDiffContent('delete', deleteOfReplaceWords)
           const createOfReplaceWords = this.newWords.slice(
             operation.newStart,
             operation.newEnd,
           )
-          newHtml += dressUpDiffContent('create', createOfReplaceWords)
+          newHtml += this.dressUpDiffContent('create', createOfReplaceWords)
           break
         default:
           const exhaustiveCheck: never = operation.type
@@ -222,7 +271,7 @@ export default class HtmlDiff {
       }
     })
 
-    const result = [oldHtml, newHtml]
+    const result: [string, string] = [oldHtml, newHtml]
     this.sideBySideContents = result
     return result
   }
@@ -234,8 +283,11 @@ export default class HtmlDiff {
    */
   private convertHtml2Words(html: string): string[] {
     // atomic word: html tag、continuous numbers or letters、blank space、symbol or other word such as Chinese
-    return html.match(/<video[^>]*>.*?<\/video>|<[^>]+>|\w+\b|\s+|[^<>\w]/gms) || []
-    // todo image
+    return (
+      html.match(
+        /<picture[^>]*>.*?<\/picture>|<video[^>]*>.*?<\/video>|<[^>]+>|\w+\b|\s+|[^<>\w]/gms,
+      ) || []
+    )
   }
 
   private getMatchedBlockList(
@@ -325,7 +377,7 @@ export default class HtmlDiff {
       }
     }
 
-    return maxSize >= this.minMatchedSize ? bestMatchedBlock : null
+    return maxSize >= this.config.minMatchedSize ? bestMatchedBlock : null
   }
 
   // use matchedBlockList walk the words to find change description
@@ -379,5 +431,64 @@ export default class HtmlDiff {
       operationList.push(Object.assign(tailOperationBase, { type: 'delete' as const }))
     }
     return operationList
+  }
+
+  private dressUpDiffContent(type: BaseOpType, words: string[]): string {
+    const wordsLength = words.length
+    if (!wordsLength) {
+      return ''
+    }
+
+    let result = ''
+    let textStartIndex = 0
+    for (let i = 0; i < wordsLength; i++) {
+      const word = words[i]
+      // this word is html tag
+      if (word.match(htmlTagReg)) {
+        // deal text words before
+        if (i > textStartIndex) {
+          result += this.dressUpText(type, words.slice(textStartIndex, i))
+        }
+        // deal this tag
+        textStartIndex = i + 1
+        if (word.match(htmlVideoTagReg)) {
+          result += this.dressUpBlockTag(type, word)
+        } else if ([htmlImgTagReg].some(item => word.match(item))) {
+          result += this.dressUpInlineTag(type, word)
+        } else {
+          result += word
+        }
+      }
+    }
+    if (textStartIndex < wordsLength) {
+      result += this.dressUpText(type, words.slice(textStartIndex))
+    }
+    return result
+  }
+
+  private dressUpText(type: BaseOpType, words: string[]): string {
+    const text = words.join('')
+    if (!text.trim()) return ''
+    if (type === 'create')
+      return `<span class="${this.config.classNames.createText}">${text}</span>`
+    if (type === 'delete')
+      return `<span class="${this.config.classNames.deleteText}">${text}</span>`
+    return ''
+  }
+
+  private dressUpInlineTag(type: BaseOpType, word: string): string {
+    if (type === 'create')
+      return `<span class="${this.config.classNames.createInline}">${word}</span>`
+    if (type === 'delete')
+      return `<span class="${this.config.classNames.deleteInline}">${word}</span>`
+    return ''
+  }
+
+  private dressUpBlockTag(type: BaseOpType, word: string): string {
+    if (type === 'create')
+      return `<div class="${this.config.classNames.createBlock}">${word}</div>`
+    if (type === 'delete')
+      return `<div class="${this.config.classNames.deleteBlock}">${word}</div>`
+    return ''
   }
 }

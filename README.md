@@ -1,6 +1,6 @@
 # Html Diff
 
-Generate HTML content with unified or side-by-side differences.
+Compare HTML and generate the differences in either a unified view or a side-by-side comparison.
 
 ## Install
 
@@ -22,13 +22,30 @@ const unifiedContent = diff.getUnifiedContent()
 const sideBySideContents = diff.getSideBySideContents()
 ```
 
+You can use your own styles without import the css file
+
+```js
+import HtmlDiff from '@armantang/html-diff'
+
+const oldHtml = `<div>hello</div>`
+const newHtml = `<div>hello world</div>`
+const diff = new HtmlDiff(oldHtml, newHtml, {
+  minMatchedSize: 3,
+  classNames: {
+    createText: 'cra-txt',
+    deleteText: 'del-txt',
+    createInline: 'cra-inl',
+    deleteInline: 'del-inl',
+    createBlock: 'cra-blo',
+    deleteBlock: 'del-blo',
+  },
+})
+const unifiedContent = diff.getUnifiedContent()
+const sideBySideContents = diff.getSideBySideContents()
+```
+
 ## Preview
 
-### unified differences
+[See online demo...](https://arman19941113.github.io/html-diff/)
 
-![home](https://arman19941113.github.io/html-diff/unified.png)
-
-### side-by-side differences
-
-![home](https://arman19941113.github.io/html-diff/sidebyside.png)
-
+![home](https://arman19941113.github.io/html-diff/demo.png)

@@ -16,7 +16,7 @@ export default function useInputData() {
 <p>今天和明天已经由昨天决定，你还可以决定后天。</p>
 <p>只有当你离开自己的舒适区时，你才会挑战自己的极限。</p>
 <p>一本有价值的书就是一盏智慧之灯，总有人不断从中提取光明。</p>
-<img src="src/assets/dog.jpg" alt="dog">
+<img src="dog.jpg" alt="dog">
 <h2>Try video</h2>
 <video style="width: 100%;" controls>
   <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
@@ -36,7 +36,7 @@ export default function useInputData() {
 <p>无休止的欲望像个黑洞，浸染了我们原本澄澈而简单的心</p>
 <p>只有当你离开自己的舒适区时，你才会挑战自己的极限。</p>
 <p>一本有价值的书就是一盏智慧之灯，总有人不断从中提取光明。</p>
-<img src="src/assets/cat.jpg" alt="cat">
+<img src="cat.jpg" alt="cat">
 <h2>Try video</h2>
 <h2>Set the bird's wings with gold and it will never again soar in the sky.</h2>
 <video style="width: 100%;" controls src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4"></video>`)
