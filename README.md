@@ -1,6 +1,8 @@
 # Html Diff
 
-Compare HTML and generate the differences in either a unified view or a side-by-side comparison.
+Compare HTML and generate the differences in either a unified view or a side-by-side comparison. [See online demo...](https://arman19941113.github.io/html-diff/)
+
+![home](https://arman19941113.github.io/html-diff/demo.png)
 
 ## Install
 
@@ -43,9 +45,3 @@ const diff = new HtmlDiff(oldHtml, newHtml, {
 const unifiedContent = diff.getUnifiedContent()
 const sideBySideContents = diff.getSideBySideContents()
 ```
-
-## Preview
-
-[See online demo...](https://arman19941113.github.io/html-diff/)
-
-![home](https://arman19941113.github.io/html-diff/demo.png)
