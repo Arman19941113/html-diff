@@ -96,3 +96,62 @@ exports[`HtmlDiff > should work with basic replace 2`] = `
   "<div><span class="html-diff-create-text-wrapper">world</span></div>",
 ]
 `;
+
+exports[`HtmlDiff > should work with equal 1`] = `
+"<h1>hello world</h1>
+<p>你若安好，便是晴天</p>"
+`;
+
+exports[`HtmlDiff > should work with equal 2`] = `
+[
+  "<h1>hello world</h1>
+<p>你若安好，便是晴天</p>",
+  "<h1>hello world</h1>
+<p>你若安好，便是晴天</p>",
+]
+`;
+
+exports[`HtmlDiff > should work with equal double 1`] = `
+"<p>hello world</p>
+<p><span class="html-diff-delete-text-wrapper">你若安好，便是晴天</span><span class="html-diff-create-text-wrapper">今天天气很不错</span></p>
+<p>你的微笑总是让我为你着迷</p>"
+`;
+
+exports[`HtmlDiff > should work with equal double 2`] = `
+[
+  "<p data-seq="1">hello world</p>
+<p data-seq="2"><span class="html-diff-delete-text-wrapper">你若安好，便是晴天</span></p>
+<p data-seq="3">你的微笑总是让我为你着迷</p>",
+  "<p data-seq="1">hello world</p>
+<p data-seq="2"><span class="html-diff-create-text-wrapper">今天天气很不错</span></p>
+<p data-seq="3">你的微笑总是让我为你着迷</p>",
+]
+`;
+
+exports[`HtmlDiff > should work with equal end 1`] = `
+"<p>你<span class="html-diff-delete-text-wrapper">有一双会说话的眼睛</span><span class="html-diff-create-text-wrapper">的微笑总是让我为你着迷</span></p>
+<p>你若安好，便是晴天</p>"
+`;
+
+exports[`HtmlDiff > should work with equal end 2`] = `
+[
+  "<p data-seq="1">你<span class="html-diff-delete-text-wrapper">有一双会说话的眼睛</span></p>
+<p data-seq="2">你若安好，便是晴天</p>",
+  "<p data-seq="1">你<span class="html-diff-create-text-wrapper">的微笑总是让我为你着迷</span></p>
+<p data-seq="2">你若安好，便是晴天</p>",
+]
+`;
+
+exports[`HtmlDiff > should work with equal start 1`] = `
+"<p>hello world</p>
+<p><span class="html-diff-delete-text-wrapper">你若安好，便是晴天</span><span class="html-diff-create-text-wrapper">今天天气很不错</span></p>"
+`;
+
+exports[`HtmlDiff > should work with equal start 2`] = `
+[
+  "<p data-seq="1">hello world</p>
+<p data-seq="2"><span class="html-diff-delete-text-wrapper">你若安好，便是晴天</span></p>",
+  "<p data-seq="1">hello world</p>
+<p data-seq="2"><span class="html-diff-create-text-wrapper">今天天气很不错</span></p>",
+]
+`;

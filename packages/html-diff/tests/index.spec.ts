@@ -26,6 +26,48 @@ describe('HtmlDiff', () => {
     expect(diff.getSideBySideContents()).toMatchSnapshot()
   })
 
+  it('should work with equal', function () {
+    const oldHtml = `<h1>hello world</h1>
+<p>你若安好，便是晴天</p>`
+    const newHtml = `<h1>hello world</h1>
+<p>你若安好，便是晴天</p>`
+    const diff = new HtmlDiff(oldHtml, newHtml)
+    expect(diff.getUnifiedContent()).toMatchSnapshot()
+    expect(diff.getSideBySideContents()).toMatchSnapshot()
+  })
+
+  it('should work with equal start', function () {
+    const oldHtml = `<p>hello world</p>
+<p>你若安好，便是晴天</p>`
+    const newHtml = `<p>hello world</p>
+<p>今天天气很不错</p>`
+    const diff = new HtmlDiff(oldHtml, newHtml)
+    expect(diff.getUnifiedContent()).toMatchSnapshot()
+    expect(diff.getSideBySideContents()).toMatchSnapshot()
+  })
+
+  it('should work with equal end', function () {
+    const oldHtml = `<p>你有一双会说话的眼睛</p>
+<p>你若安好，便是晴天</p>`
+    const newHtml = `<p>你的微笑总是让我为你着迷</p>
+<p>你若安好，便是晴天</p>`
+    const diff = new HtmlDiff(oldHtml, newHtml)
+    expect(diff.getUnifiedContent()).toMatchSnapshot()
+    expect(diff.getSideBySideContents()).toMatchSnapshot()
+  })
+
+  it('should work with equal double', function () {
+    const oldHtml = `<p>hello world</p>
+<p>你若安好，便是晴天</p>
+<p>你的微笑总是让我为你着迷</p>`
+    const newHtml = `<p>hello world</p>
+<p>今天天气很不错</p>
+<p>你的微笑总是让我为你着迷</p>`
+    const diff = new HtmlDiff(oldHtml, newHtml)
+    expect(diff.getUnifiedContent()).toMatchSnapshot()
+    expect(diff.getSideBySideContents()).toMatchSnapshot()
+  })
+
   it('should work sample 1', function () {
     const oldHtml = `<div>hello world</div>`
     const newHtml = `<h1>You got a dream. You gotta protect it.</h1>`

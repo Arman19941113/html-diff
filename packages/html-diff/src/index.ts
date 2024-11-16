@@ -290,20 +290,72 @@ export default class HtmlDiff {
     )
   }
 
-  private getMatchedBlockList(
-    oldStart = 0,
-    oldEnd: number = this.oldWords.length,
-    newStart = 0,
-    newEnd: number = this.newWords.length,
+  private getMatchedBlockList(): MatchedBlock[] {
+    const n1 = this.oldWords.length
+    const n2 = this.newWords.length
+
+    // 1. sync from start
+    let start: MatchedBlock | null = null
+    let i = 0
+    while (i < n1 && i < n2 && this.oldWords[i] === this.newWords[i]) {
+      i++
+    }
+    if (i >= this.config.minMatchedSize) {
+      start = {
+        oldStart: 0,
+        oldEnd: i,
+        newStart: 0,
+        newEnd: i,
+        size: i,
+      }
+    }
+
+    // 2. sync from end
+    let end: MatchedBlock | null = null
+    let e1 = n1 - 1
+    let e2 = n2 - 1
+    while (i <= e1 && i <= e2 && this.oldWords[e1] === this.newWords[e2]) {
+      e1--
+      e2--
+    }
+    const size = n1 - 1 - e1
+    if (size >= this.config.minMatchedSize) {
+      end = {
+        oldStart: e1 + 1,
+        oldEnd: n1,
+        newStart: e2 + 1,
+        newEnd: n2,
+        size,
+      }
+    }
+
+    const ret = this.computeMatchedBlockList(
+      start ? i : 0,
+      end ? e1 + 1 : n1,
+      start ? i : 0,
+      end ? e2 + 1 : n2,
+    )
+    if (start) ret.unshift(start)
+    if (end) ret.push(end)
+
+    return ret
+  }
+
+  // todo difflib
+  private computeMatchedBlockList(
+    oldStart: number,
+    oldEnd: number,
+    newStart: number,
+    newEnd: number,
     matchedBlockList: MatchedBlock[] = [],
   ): MatchedBlock[] {
-    const matchBlock = this.getBestMatchedBlock(oldStart, oldEnd, newStart, newEnd)
+    const matchBlock = this.computeBestMatchedBlock(oldStart, oldEnd, newStart, newEnd)
     if (!matchBlock) {
       return []
     }
 
     if (oldStart < matchBlock.oldStart && newStart < matchBlock.newStart) {
-      this.getMatchedBlockList(
+      this.computeMatchedBlockList(
         oldStart,
         matchBlock.oldStart,
         newStart,
@@ -313,7 +365,7 @@ export default class HtmlDiff {
     }
     matchedBlockList.push(matchBlock)
     if (oldEnd > matchBlock.oldEnd && newEnd > matchBlock.newEnd) {
-      this.getMatchedBlockList(
+      this.computeMatchedBlockList(
         matchBlock.oldEnd,
         oldEnd,
         matchBlock.newEnd,
@@ -326,7 +378,7 @@ export default class HtmlDiff {
 
   // find the longest matched block between old and new words
   // 滑动窗口 O((N+M)×min(N,M))
-  private getBestMatchedBlock(
+  private computeBestMatchedBlock(
     oldStart: number,
     oldEnd: number,
     newStart: number,
