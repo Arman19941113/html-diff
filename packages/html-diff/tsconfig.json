@@ -13,8 +13,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strictNullChecks": true,
-    "allowUnreachableCode": false,
-    "removeComments": true
+    "allowUnreachableCode": false
   },
   "include": ["src/**/*.ts", "tests/**/*.test.ts"]
 }

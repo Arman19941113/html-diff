@@ -26,8 +26,10 @@ const mjsTask = {
   plugins: [
     typescript({
       tsconfig: resolve('tsconfig.json'),
-    }),
-    nodeResolve(),
+      compilerOptions: {
+        'removeComments': true,
+      },
+    }), nodeResolve(),
   ],
 }
 
@@ -41,8 +43,7 @@ const cssTask = {
     rollupPostcss({
       extract: true,
       plugins: [
-        postcssNested,
-        postcssPresetEnv({
+        postcssNested, postcssPresetEnv({
           stage: 2,
           enableClientSidePolyfills: true,
           browsers: '> 0.5%, last 2 versions, not dead',

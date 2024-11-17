@@ -18,6 +18,8 @@ type BaseOpType = 'delete' | 'create'
 
 interface HtmlDiffConfig {
   minMatchedSize: number
+  greedyMatch: boolean
+  greedyBoundary: number
   classNames: {
     createText: string
     deleteText: string
@@ -29,7 +31,26 @@ interface HtmlDiffConfig {
 }
 
 export interface HtmlDiffOptions {
+  /**
+   * Determine the minimum threshold for calculating common subsequences.
+   * You may adjust it to a value larger than 2, but not lower, due to the potential inclusion of HTML tags in the count.
+   * @defaultValue 2
+   */
   minMatchedSize?: number
+  /**
+   * When greedyMatch is enabled, if the length of the sub-sequences exceeds greedyBoundary,
+   * we will use the matched sub-sequences that are sufficiently good, even if they are not optimal, to enhance performance.
+   * @defaultValue true
+   */
+  greedyMatch?: boolean
+  /**
+   * @defaultValue 1000
+   */
+  greedyBoundary?: number
+  /**
+   * The classNames for wrapper DOM.
+   * Use this to configure your own styles without importing the built-in CSS file
+   */
   classNames?: Partial<{
     createText?: string
     deleteText?: string
@@ -53,6 +74,7 @@ export default class HtmlDiff {
   private readonly newWords: string[] = []
   private readonly matchedBlockList: MatchedBlock[] = []
   private readonly operationList: Operation[] = []
+  private leastCommonLength: number = Infinity
   private unifiedContent?: string
   private sideBySideContents?: [string, string]
 
@@ -61,6 +83,8 @@ export default class HtmlDiff {
     newHtml: string,
     {
       minMatchedSize = 2,
+      greedyMatch = true,
+      greedyBoundary = 1000,
       classNames = {
         createText: 'html-diff-create-text-wrapper',
         deleteText: 'html-diff-delete-text-wrapper',
@@ -74,6 +98,8 @@ export default class HtmlDiff {
     // init config
     this.config = {
       minMatchedSize,
+      greedyMatch,
+      greedyBoundary,
       classNames: {
         createText: 'html-diff-create-text-wrapper',
         deleteText: 'html-diff-delete-text-wrapper',
@@ -93,8 +119,8 @@ export default class HtmlDiff {
     }
 
     // step1: split HTML to atomic words
-    this.oldWords = this.convertHtml2Words(oldHtml)
-    this.newWords = this.convertHtml2Words(newHtml)
+    this.oldWords = this.tokenize(oldHtml)
+    this.newWords = this.tokenize(newHtml)
     // step2: find matched blocks
     this.matchedBlockList = this.getMatchedBlockList()
     // step3: generate operation list
@@ -277,11 +303,12 @@ export default class HtmlDiff {
   }
 
   /**
-   * convert HTML to word list
-   * "<a> Hello World </a>"
+   * convert HTML to tokens
+   * @example
+   * tokenize("<a> Hello World </a>")
    * ["<a>"," ", "Hello", " ", "World", " ", "</a>"]
    */
-  private convertHtml2Words(html: string): string[] {
+  private tokenize(html: string): string[] {
     // atomic word: html tag、continuous numbers or letters、blank space、symbol or other word such as Chinese
     return (
       html.match(
@@ -329,19 +356,24 @@ export default class HtmlDiff {
       }
     }
 
-    const ret = this.computeMatchedBlockList(
-      start ? i : 0,
-      end ? e1 + 1 : n1,
-      start ? i : 0,
-      end ? e2 + 1 : n2,
-    )
+    const oldStart = start ? i : 0
+    const oldEnd = end ? e1 + 1 : n1
+    const newStart = start ? i : 0
+    const newEnd = end ? e2 + 1 : n2
+    // optimize for big sequences match
+    if (this.config.greedyMatch) {
+      const commonLength = Math.min(oldEnd - oldStart, newEnd - newStart)
+      if (commonLength > this.config.greedyBoundary) {
+        this.leastCommonLength = Math.floor(commonLength / 3)
+      }
+    }
+    const ret = this.computeMatchedBlockList(oldStart, oldEnd, newStart, newEnd)
     if (start) ret.unshift(start)
     if (end) ret.push(end)
 
     return ret
   }
 
-  // todo difflib
   private computeMatchedBlockList(
     oldStart: number,
     oldEnd: number,
@@ -390,6 +422,7 @@ export default class HtmlDiff {
       const ret = this.slideBestMatchedBlock(i, newStart, len)
       if (ret && (!bestMatchedBlock || ret.size > bestMatchedBlock.size)) {
         bestMatchedBlock = ret
+        if (ret.size > this.leastCommonLength) return bestMatchedBlock
       }
     }
     for (let j = newStart; j < newEnd; j++) {
@@ -397,6 +430,7 @@ export default class HtmlDiff {
       const ret = this.slideBestMatchedBlock(oldStart, j, len)
       if (ret && (!bestMatchedBlock || ret.size > bestMatchedBlock.size)) {
         bestMatchedBlock = ret
+        if (ret.size > this.leastCommonLength) return bestMatchedBlock
       }
     }
     return bestMatchedBlock
