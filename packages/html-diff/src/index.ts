@@ -153,14 +153,6 @@ export default class HtmlDiff {
           )
           break
         case 'replace':
-          // should handle the duplicated tags(to optimize): find the same tag name and reserve one
-          // delete: <p>dd
-          // create: <p>ff</p><p>haha
-          // expected: <p><span class>dd</span><span class>ff</span></p><p>haha
-          // delete: <p>dd</p><p>滴
-          // create: <p>ff</p><p>haha
-          // expected: <p><span class>dd</span><span class>ff</span></p>ha<p>
-
           // deal specially tag replace
           const olds = this.oldWords.slice(operation.oldStart, operation.oldEnd)
           const news = this.newWords.slice(operation.newStart, operation.newEnd)
