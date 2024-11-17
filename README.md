@@ -10,7 +10,7 @@ Compare HTML and generate the differences in either a unified view or a side-by-
 pnpm add @armantang/html-diff
 ```
 
-## Quick Start
+## Usage
 
 ```js
 import '@armantang/html-diff/dist/index.css'
@@ -62,3 +62,7 @@ interface HtmlDiffOptions {
   }>
 }
 ```
+
+## Synchronized scrolling
+
+In the sideBySideContents, some elements have the `data-seq` attribute. We can use this to implement synchronized scrolling. [Click to see the demo.](https://github.com/Arman19941113/html-diff/blob/master/examples/basic/src/components/SideBySide.jsx)
