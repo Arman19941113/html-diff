@@ -32,14 +32,14 @@ interface HtmlDiffConfig {
 
 export interface HtmlDiffOptions {
   /**
-   * Determine the minimum threshold for calculating common subsequences.
+   * Determine the minimum threshold for calculating common sub-tokens.
    * You may adjust it to a value larger than 2, but not lower, due to the potential inclusion of HTML tags in the count.
    * @defaultValue 2
    */
   minMatchedSize?: number
   /**
-   * When greedyMatch is enabled, if the length of the sub-sequences exceeds greedyBoundary,
-   * we will use the matched sub-sequences that are sufficiently good, even if they are not optimal, to enhance performance.
+   * When greedyMatch is enabled, if the length of the sub-tokens exceeds greedyBoundary,
+   * we will use the matched sub-tokens that are sufficiently good, even if they are not optimal, to enhance performance.
    * @defaultValue true
    */
   greedyMatch?: boolean
@@ -70,8 +70,8 @@ const htmlVideoTagReg = /^<video[^>]*>.*?<\/video>$/ms
 
 export default class HtmlDiff {
   private readonly config: HtmlDiffConfig
-  private readonly oldWords: string[] = []
-  private readonly newWords: string[] = []
+  private readonly oldTokens: string[] = []
+  private readonly newTokens: string[] = []
   private readonly matchedBlockList: MatchedBlock[] = []
   private readonly operationList: Operation[] = []
   private leastCommonLength: number = Infinity
@@ -118,9 +118,9 @@ export default class HtmlDiff {
       return
     }
 
-    // step1: split HTML to atomic words
-    this.oldWords = this.tokenize(oldHtml)
-    this.newWords = this.tokenize(newHtml)
+    // step1: split HTML to tokens(atomic tokens)
+    this.oldTokens = this.tokenize(oldHtml)
+    this.newTokens = this.tokenize(newHtml)
     // step2: find matched blocks
     this.matchedBlockList = this.getMatchedBlockList()
     // step3: generate operation list
@@ -136,26 +136,29 @@ export default class HtmlDiff {
     this.operationList.forEach(operation => {
       switch (operation.type) {
         case 'equal':
-          for (const word of this.newWords.slice(operation.newStart, operation.newEnd)) {
-            result += word
+          for (const token of this.newTokens.slice(
+            operation.newStart,
+            operation.newEnd,
+          )) {
+            result += token
           }
           break
         case 'delete':
           result += this.dressUpDiffContent(
             'delete',
-            this.oldWords.slice(operation.oldStart, operation.oldEnd),
+            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
           )
           break
         case 'create':
           result += this.dressUpDiffContent(
             'create',
-            this.newWords.slice(operation.newStart, operation.newEnd),
+            this.newTokens.slice(operation.newStart, operation.newEnd),
           )
           break
         case 'replace':
-          // deal specially tag replace
-          const olds = this.oldWords.slice(operation.oldStart, operation.oldEnd)
-          const news = this.newWords.slice(operation.newStart, operation.newEnd)
+          // handle specially tag replace
+          const olds = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
+          const news = this.newTokens.slice(operation.newStart, operation.newEnd)
           if (
             olds.length === 1 &&
             news.length === 1 &&
@@ -166,36 +169,38 @@ export default class HtmlDiff {
             break
           }
 
-          const deleteOfWords = []
-          const createOfWords = []
+          const deletedTokens = []
+          const createdTokens = []
           let createIndex = operation.newStart
           for (
             let deleteIndex = operation.oldStart;
             deleteIndex < operation.oldEnd;
             deleteIndex++
           ) {
-            const deleteWord = this.oldWords[deleteIndex]
-            const matchTagResultD = deleteWord.match(htmlTagWithNameReg)
+            const deletedToken = this.oldTokens[deleteIndex]
+            const matchTagResultD = deletedToken.match(htmlTagWithNameReg)
             if (matchTagResultD) {
-              // handle replaced tag word
+              // handle replaced tag token
 
               // skip special tag
-              if ([htmlImgTagReg, htmlVideoTagReg].some(item => deleteWord.match(item))) {
-                deleteOfWords.push(deleteWord)
+              if (
+                [htmlImgTagReg, htmlVideoTagReg].some(item => deletedToken.match(item))
+              ) {
+                deletedTokens.push(deletedToken)
                 continue
               }
 
-              // deal normal tag
-              result += this.dressUpDiffContent('delete', deleteOfWords)
-              deleteOfWords.splice(0)
+              // handle normal tag
+              result += this.dressUpDiffContent('delete', deletedTokens)
+              deletedTokens.splice(0)
               let isTagInNewFind = false
               for (
                 let tempCreateIndex = createIndex;
                 tempCreateIndex < operation.newEnd;
                 tempCreateIndex++
               ) {
-                const createWord = this.newWords[tempCreateIndex]
-                const matchTagResultC = createWord.match(htmlTagWithNameReg)
+                const createdToken = this.newTokens[tempCreateIndex]
+                const matchTagResultC = createdToken.match(htmlTagWithNameReg)
                 if (
                   matchTagResultC &&
                   matchTagResultC.groups!.name === matchTagResultD.groups!.name &&
@@ -203,29 +208,29 @@ export default class HtmlDiff {
                 ) {
                   // find first matched tag, but not maybe the expected tag(to optimize)
                   isTagInNewFind = true
-                  result += this.dressUpDiffContent('create', createOfWords)
-                  result += createWord
-                  createOfWords.splice(0)
+                  result += this.dressUpDiffContent('create', createdTokens)
+                  result += createdToken
+                  createdTokens.splice(0)
                   createIndex = tempCreateIndex + 1
                   break
                 } else {
-                  createOfWords.push(createWord)
+                  createdTokens.push(createdToken)
                 }
               }
               if (!isTagInNewFind) {
-                result += deleteWord
-                createOfWords.splice(0)
+                result += deletedToken
+                createdTokens.splice(0)
               }
             } else {
-              // word is not a tag
-              deleteOfWords.push(deleteWord)
+              // token is not a tag
+              deletedTokens.push(deletedToken)
             }
           }
           if (createIndex < operation.newEnd) {
-            createOfWords.push(...this.newWords.slice(createIndex, operation.newEnd))
+            createdTokens.push(...this.newTokens.slice(createIndex, operation.newEnd))
           }
-          result += this.dressUpDiffContent('delete', deleteOfWords)
-          result += this.dressUpDiffContent('create', createOfWords)
+          result += this.dressUpDiffContent('delete', deletedTokens)
+          result += this.dressUpDiffContent('create', createdTokens)
           break
         default:
           const exhaustiveCheck: never = operation.type
@@ -247,41 +252,41 @@ export default class HtmlDiff {
     this.operationList.forEach(operation => {
       switch (operation.type) {
         case 'equal':
-          const equalWords = this.newWords.slice(operation.newStart, operation.newEnd)
+          const equalTokens = this.newTokens.slice(operation.newStart, operation.newEnd)
           let equalString = ''
-          for (const word of equalWords) {
+          for (const token of equalTokens) {
             // find start tags and add data-seq to enable sync scroll
-            const startTagMatch = word.match(htmlStartTagReg)
+            const startTagMatch = token.match(htmlStartTagReg)
             if (startTagMatch) {
               equalSequence += 1
               const tagNameLength = startTagMatch.groups!.name.length + 1
-              equalString += `${word.slice(0, tagNameLength)} data-seq="${equalSequence}"${word.slice(tagNameLength)}`
+              equalString += `${token.slice(0, tagNameLength)} data-seq="${equalSequence}"${token.slice(tagNameLength)}`
             } else {
-              equalString += word
+              equalString += token
             }
           }
           oldHtml += equalString
           newHtml += equalString
           break
         case 'delete':
-          const deleteWords = this.oldWords.slice(operation.oldStart, operation.oldEnd)
-          oldHtml += this.dressUpDiffContent('delete', deleteWords)
+          const deletedTokens = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
+          oldHtml += this.dressUpDiffContent('delete', deletedTokens)
           break
         case 'create':
-          const createWords = this.newWords.slice(operation.newStart, operation.newEnd)
-          newHtml += this.dressUpDiffContent('create', createWords)
+          newHtml += this.dressUpDiffContent(
+            'create',
+            this.newTokens.slice(operation.newStart, operation.newEnd),
+          )
           break
         case 'replace':
-          const deleteOfReplaceWords = this.oldWords.slice(
-            operation.oldStart,
-            operation.oldEnd,
+          oldHtml += this.dressUpDiffContent(
+            'delete',
+            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
           )
-          oldHtml += this.dressUpDiffContent('delete', deleteOfReplaceWords)
-          const createOfReplaceWords = this.newWords.slice(
-            operation.newStart,
-            operation.newEnd,
+          newHtml += this.dressUpDiffContent(
+            'create',
+            this.newTokens.slice(operation.newStart, operation.newEnd),
           )
-          newHtml += this.dressUpDiffContent('create', createOfReplaceWords)
           break
         default:
           const exhaustiveCheck: never = operation.type
@@ -301,7 +306,7 @@ export default class HtmlDiff {
    * ["<a>"," ", "Hello", " ", "World", " ", "</a>"]
    */
   private tokenize(html: string): string[] {
-    // atomic word: html tag、continuous numbers or letters、blank space、symbol or other word such as Chinese
+    // atomic token: html tag、continuous numbers or letters、blank spaces、other symbol
     return (
       html.match(
         /<picture[^>]*>.*?<\/picture>|<video[^>]*>.*?<\/video>|<[^>]+>|\w+\b|\s+|[^<>\w]/gms,
@@ -310,13 +315,13 @@ export default class HtmlDiff {
   }
 
   private getMatchedBlockList(): MatchedBlock[] {
-    const n1 = this.oldWords.length
-    const n2 = this.newWords.length
+    const n1 = this.oldTokens.length
+    const n2 = this.newTokens.length
 
     // 1. sync from start
     let start: MatchedBlock | null = null
     let i = 0
-    while (i < n1 && i < n2 && this.oldWords[i] === this.newWords[i]) {
+    while (i < n1 && i < n2 && this.oldTokens[i] === this.newTokens[i]) {
       i++
     }
     if (i >= this.config.minMatchedSize) {
@@ -333,7 +338,7 @@ export default class HtmlDiff {
     let end: MatchedBlock | null = null
     let e1 = n1 - 1
     let e2 = n2 - 1
-    while (i <= e1 && i <= e2 && this.oldWords[e1] === this.newWords[e2]) {
+    while (i <= e1 && i <= e2 && this.oldTokens[e1] === this.newTokens[e2]) {
       e1--
       e2--
     }
@@ -348,11 +353,12 @@ export default class HtmlDiff {
       }
     }
 
+    // 3. handle rest
     const oldStart = start ? i : 0
     const oldEnd = end ? e1 + 1 : n1
     const newStart = start ? i : 0
     const newEnd = end ? e2 + 1 : n2
-    // optimize for big sequences match
+    // optimize for large tokens
     if (this.config.greedyMatch) {
       const commonLength = Math.min(oldEnd - oldStart, newEnd - newStart)
       if (commonLength > this.config.greedyBoundary) {
@@ -400,8 +406,7 @@ export default class HtmlDiff {
     return matchedBlockList
   }
 
-  // find the longest matched block between old and new words
-  // 滑动窗口 O((N+M)×min(N,M))
+  // Find the longest matched block between tokens
   private computeBestMatchedBlock(
     oldStart: number,
     oldEnd: number,
@@ -438,7 +443,7 @@ export default class HtmlDiff {
 
     let continuousSize = 0
     for (let i = 0; i < len; i++) {
-      if (this.oldWords[addA + i] === this.newWords[addB + i]) {
+      if (this.oldTokens[addA + i] === this.newTokens[addB + i]) {
         continuousSize++
       } else {
         continuousSize = 0
@@ -458,7 +463,7 @@ export default class HtmlDiff {
     return maxSize >= this.config.minMatchedSize ? bestMatchedBlock : null
   }
 
-  // use matchedBlockList walk the words to find change description
+  // Generate operation list by matchedBlockList
   private getOperationList(): Operation[] {
     const operationList: Operation[] = []
     let walkIndexOld = 0
@@ -490,9 +495,9 @@ export default class HtmlDiff {
       walkIndexOld = matchedBlock.oldEnd
       walkIndexNew = matchedBlock.newEnd
     }
-    // deal the tail content
-    const maxIndexOld = this.oldWords.length
-    const maxIndexNew = this.newWords.length
+    // handle the tail content
+    const maxIndexOld = this.oldTokens.length
+    const maxIndexNew = this.newTokens.length
     const tailOperationBase = {
       oldStart: walkIndexOld,
       oldEnd: maxIndexOld,
@@ -511,41 +516,41 @@ export default class HtmlDiff {
     return operationList
   }
 
-  private dressUpDiffContent(type: BaseOpType, words: string[]): string {
-    const wordsLength = words.length
-    if (!wordsLength) {
+  private dressUpDiffContent(type: BaseOpType, tokens: string[]): string {
+    const tokensLength = tokens.length
+    if (!tokensLength) {
       return ''
     }
 
     let result = ''
     let textStartIndex = 0
-    for (let i = 0; i < wordsLength; i++) {
-      const word = words[i]
-      // this word is html tag
-      if (word.match(htmlTagReg)) {
-        // deal text words before
+    for (let i = 0; i < tokensLength; i++) {
+      const token = tokens[i]
+      // this token is html tag
+      if (token.match(htmlTagReg)) {
+        // handle text tokens before
         if (i > textStartIndex) {
-          result += this.dressUpText(type, words.slice(textStartIndex, i))
+          result += this.dressUpText(type, tokens.slice(textStartIndex, i))
         }
-        // deal this tag
+        // handle this tag
         textStartIndex = i + 1
-        if (word.match(htmlVideoTagReg)) {
-          result += this.dressUpBlockTag(type, word)
-        } else if ([htmlImgTagReg].some(item => word.match(item))) {
-          result += this.dressUpInlineTag(type, word)
+        if (token.match(htmlVideoTagReg)) {
+          result += this.dressUpBlockTag(type, token)
+        } else if ([htmlImgTagReg].some(item => token.match(item))) {
+          result += this.dressUpInlineTag(type, token)
         } else {
-          result += word
+          result += token
         }
       }
     }
-    if (textStartIndex < wordsLength) {
-      result += this.dressUpText(type, words.slice(textStartIndex))
+    if (textStartIndex < tokensLength) {
+      result += this.dressUpText(type, tokens.slice(textStartIndex))
     }
     return result
   }
 
-  private dressUpText(type: BaseOpType, words: string[]): string {
-    const text = words.join('')
+  private dressUpText(type: BaseOpType, tokens: string[]): string {
+    const text = tokens.join('')
     if (!text.trim()) return ''
     if (type === 'create')
       return `<span class="${this.config.classNames.createText}">${text}</span>`
@@ -554,19 +559,19 @@ export default class HtmlDiff {
     return ''
   }
 
-  private dressUpInlineTag(type: BaseOpType, word: string): string {
+  private dressUpInlineTag(type: BaseOpType, token: string): string {
     if (type === 'create')
-      return `<span class="${this.config.classNames.createInline}">${word}</span>`
+      return `<span class="${this.config.classNames.createInline}">${token}</span>`
     if (type === 'delete')
-      return `<span class="${this.config.classNames.deleteInline}">${word}</span>`
+      return `<span class="${this.config.classNames.deleteInline}">${token}</span>`
     return ''
   }
 
-  private dressUpBlockTag(type: BaseOpType, word: string): string {
+  private dressUpBlockTag(type: BaseOpType, token: string): string {
     if (type === 'create')
-      return `<div class="${this.config.classNames.createBlock}">${word}</div>`
+      return `<div class="${this.config.classNames.createBlock}">${token}</div>`
     if (type === 'delete')
-      return `<div class="${this.config.classNames.deleteBlock}">${word}</div>`
+      return `<div class="${this.config.classNames.deleteBlock}">${token}</div>`
     return ''
   }
 }

@@ -33,14 +33,14 @@ const diff = new HtmlDiff(oldHtml, newHtml, {
 
 interface HtmlDiffOptions {
   /**
-   * Determine the minimum threshold for calculating common subsequences.
+   * Determine the minimum threshold for calculating common sub-tokens.
    * You may adjust it to a value larger than 2, but not lower, due to the potential inclusion of HTML tags in the count.
    * @defaultValue 2
    */
   minMatchedSize?: number
   /**
-   * When greedyMatch is enabled, if the length of the sub-sequences exceeds greedyBoundary,
-   * we will use the matched sub-sequences that are sufficiently good, even if they are not optimal, to enhance performance.
+   * When greedyMatch is enabled, if the length of the sub-tokens exceeds greedyBoundary,
+   * we will use the matched sub-tokens that are sufficiently good, even if they are not optimal, to enhance performance.
    * @defaultValue true
    */
   greedyMatch?: boolean
