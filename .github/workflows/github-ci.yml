@@ -42,7 +42,7 @@ jobs:
         run: pnpm run build
 
       - name: Build example
-        run: cd examples/basic && pnpm run build --base=/html-diff/
+        run: cd examples/basic && pnpm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

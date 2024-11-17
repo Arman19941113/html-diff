@@ -5,7 +5,7 @@ import useDiffData from './hooks/useDiffData.js'
 import useInputData from './hooks/useInputData.js'
 
 function App() {
-  const [tab, setTab] = useState(1)
+  const [tab, setTab] = useState(2)
   const { oldHtml, updateOldHtml, newHtml, updateNewHtml } = useInputData()
   const { unifiedContent, sideBySideContents } = useDiffData({ oldHtml, newHtml })
 

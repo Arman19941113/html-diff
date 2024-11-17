@@ -14,7 +14,7 @@ export default function SideBySide({ sideBySideContents }) {
   let isRightScroll = false
   function handleScroll(type) {
     if (type === 'left') {
-      if (isRightScroll.current) return
+      if (isRightScroll) return
       isLeftScroll = true
       clearTimeout(timer)
       timer = setTimeout(() => {
@@ -22,7 +22,7 @@ export default function SideBySide({ sideBySideContents }) {
       }, 300)
       syncScroll(leftContainer.current, rightContainer.current)
     } else {
-      if (isLeftScroll.current) return
+      if (isLeftScroll) return
       isRightScroll = true
       clearTimeout(timer)
       timer = setTimeout(() => {
