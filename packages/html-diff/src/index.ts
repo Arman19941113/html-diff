@@ -114,7 +114,15 @@ export default class HtmlDiff {
     // no need to diff
     if (oldHtml === newHtml) {
       this.unifiedContent = oldHtml
-      this.sideBySideContents = [oldHtml, newHtml]
+      let equalSequence = 0
+      const content = oldHtml.replace(
+        /<([^\s/>]+)[^>]*>/g,
+        (match: string, name: string) => {
+          const tagNameLength = name.length + 1
+          return `${match.slice(0, tagNameLength)} data-seq="${++equalSequence}"${match.slice(tagNameLength)}`
+        },
+      )
+      this.sideBySideContents = [content, content]
       return
     }
 

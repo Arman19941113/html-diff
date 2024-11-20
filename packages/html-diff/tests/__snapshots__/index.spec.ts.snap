@@ -104,10 +104,10 @@ exports[`HtmlDiff > should work with equal 1`] = `
 
 exports[`HtmlDiff > should work with equal 2`] = `
 [
-  "<h1>hello world</h1>
-<p>你若安好，便是晴天</p>",
-  "<h1>hello world</h1>
-<p>你若安好，便是晴天</p>",
+  "<h1 data-seq="1">hello world</h1>
+<p data-seq="2">你若安好，便是晴天</p>",
+  "<h1 data-seq="1">hello world</h1>
+<p data-seq="2">你若安好，便是晴天</p>",
 ]
 `;
 
