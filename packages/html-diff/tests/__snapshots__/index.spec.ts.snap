@@ -155,3 +155,12 @@ exports[`HtmlDiff > should work with equal start 2`] = `
 <p data-seq="2"><span class="html-diff-create-text-wrapper">今天天气很不错</span></p>",
 ]
 `;
+
+exports[`HtmlDiff > should work with white space 1`] = `"<div>hello</div>"`;
+
+exports[`HtmlDiff > should work with white space 2`] = `
+[
+  "<div data-seq="1">hello</div>",
+  "<div data-seq="1">hello</div>",
+]
+`;

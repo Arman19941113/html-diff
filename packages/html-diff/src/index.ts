@@ -110,6 +110,9 @@ export default class HtmlDiff {
         ...classNames,
       },
     }
+    // white space is junk
+    oldHtml = oldHtml.trim()
+    newHtml = newHtml.trim()
 
     // no need to diff
     if (oldHtml === newHtml) {

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "strict": true,
@@ -15,5 +15,5 @@
     "strictNullChecks": true,
     "allowUnreachableCode": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.test.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.spec.ts"]
 }

@@ -9,7 +9,7 @@ import rollupPostcss from 'rollup-plugin-postcss'
 const resolve = file => path.join(import.meta.dirname, '../packages/html-diff', file)
 
 const dtsTask = {
-  input: resolve('dist-ts/index.d.ts'),
+  input: resolve('dist-ts/src/index.d.ts'),
   output: {
     file: resolve('dist/index.d.ts'),
     format: 'es',

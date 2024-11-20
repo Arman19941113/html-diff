@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest'
 import HtmlDiff from '../src'
 
 describe('HtmlDiff', () => {
+  it('should work with white space', function () {
+    const oldHtml = `<div>hello</div>`
+    const newHtml = `    <div>hello        </div>`
+    const diff = new HtmlDiff(oldHtml, newHtml)
+    expect(diff.getUnifiedContent()).toMatchSnapshot()
+    expect(diff.getSideBySideContents()).toMatchSnapshot()
+  })
+
   it('should work with basic create', function () {
     const oldHtml = `<div>hello</div>`
     const newHtml = `<div>hello world</div>`
