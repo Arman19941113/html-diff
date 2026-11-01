@@ -61,12 +61,21 @@ export interface HtmlDiffOptions {
   }>
 }
 
-const htmlStartTagReg = /^<(?<name>[^\s/>]+)[^>]*>$/
-const htmlTagWithNameReg = /^<(?<isEnd>\/)?(?<name>[^\s>]+)[^>]*>$/
+const htmlTagPart = /[^"'>]|"[^"]*"|'[^']*'/.source
+const htmlStartTag = String.raw`<(?<name>[^\s/>]+)(?:${htmlTagPart})*>`
+const htmlStartTagReg = new RegExp(`^${htmlStartTag}$`)
+const htmlStartTagsReg = new RegExp(htmlStartTag, 'g')
+const htmlTagWithNameReg = new RegExp(
+  String.raw`^<(?<isEnd>\/)?(?<name>[^\s>]+)(?:${htmlTagPart})*>$`,
+)
 
-const htmlTagReg = /^<[^>]+>/
-const htmlImgTagReg = /^<img[^>]*>$/
-const htmlVideoTagReg = /^<video[^>]*>.*?<\/video>$/ms
+const htmlTagReg = new RegExp(`^<(?:${htmlTagPart})+>`)
+const htmlImgTagReg = new RegExp(`^<img(?:${htmlTagPart})*>$`)
+const htmlVideoTagReg = new RegExp(String.raw`^<video(?:${htmlTagPart})*>.*?<\/video>$`, 'ms')
+const htmlTokenReg = new RegExp(
+  String.raw`<picture(?:${htmlTagPart})*>.*?<\/picture>|<video(?:${htmlTagPart})*>.*?<\/video>|<(?:${htmlTagPart})+>|\w+\b|\s+|[^<>\w]`,
+  'gms',
+)
 
 export default class HtmlDiff {
   private readonly config: HtmlDiffConfig
@@ -118,13 +127,10 @@ export default class HtmlDiff {
     if (oldHtml === newHtml) {
       this.unifiedContent = oldHtml
       let equalSequence = 0
-      const content = oldHtml.replace(
-        /<([^\s/>]+)[^>]*>/g,
-        (match: string, name: string) => {
-          const tagNameLength = name.length + 1
-          return `${match.slice(0, tagNameLength)} data-seq="${++equalSequence}"${match.slice(tagNameLength)}`
-        },
-      )
+      const content = oldHtml.replace(htmlStartTagsReg, (match: string, name: string) => {
+        const tagNameLength = name.length + 1
+        return `${match.slice(0, tagNameLength)} data-seq="${++equalSequence}"${match.slice(tagNameLength)}`
+      })
       this.sideBySideContents = [content, content]
       return
     }
@@ -147,10 +153,7 @@ export default class HtmlDiff {
     this.operationList.forEach(operation => {
       switch (operation.type) {
         case 'equal':
-          for (const token of this.newTokens.slice(
-            operation.newStart,
-            operation.newEnd,
-          )) {
+          for (const token of this.newTokens.slice(operation.newStart, operation.newEnd)) {
             result += token
           }
           break
@@ -194,9 +197,7 @@ export default class HtmlDiff {
               // handle replaced tag token
 
               // skip special tag
-              if (
-                [htmlImgTagReg, htmlVideoTagReg].some(item => deletedToken.match(item))
-              ) {
+              if ([htmlImgTagReg, htmlVideoTagReg].some(item => deletedToken.match(item))) {
                 deletedTokens.push(deletedToken)
                 continue
               }
@@ -318,11 +319,7 @@ export default class HtmlDiff {
    */
   private tokenize(html: string): string[] {
     // atomic token: html tag、continuous numbers or letters、blank spaces、other symbol
-    return (
-      html.match(
-        /<picture[^>]*>.*?<\/picture>|<video[^>]*>.*?<\/video>|<[^>]+>|\w+\b|\s+|[^<>\w]/gms,
-      ) || []
-    )
+    return html.match(htmlTokenReg) || []
   }
 
   private getMatchedBlockList(): MatchedBlock[] {
@@ -444,11 +441,7 @@ export default class HtmlDiff {
     return bestMatchedBlock
   }
 
-  private slideBestMatchedBlock(
-    addA: number,
-    addB: number,
-    len: number,
-  ): MatchedBlock | null {
+  private slideBestMatchedBlock(addA: number, addB: number, len: number): MatchedBlock | null {
     let maxSize = 0
     let bestMatchedBlock: MatchedBlock | null = null
 
