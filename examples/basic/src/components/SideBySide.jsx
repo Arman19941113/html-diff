@@ -9,6 +9,8 @@ export default function SideBySide({ sideBySideContents }) {
   const leftContainer = useRef(null)
   const rightContainer = useRef(null)
   useEffect(() => {
+    const leftElement = leftContainer.current
+    const rightElement = rightContainer.current
     let timer = null
     let isLeftScroll = false
     let isRightScroll = false
@@ -20,7 +22,7 @@ export default function SideBySide({ sideBySideContents }) {
         timer = setTimeout(() => {
           isLeftScroll = false
         }, 300)
-        syncScroll(leftContainer.current, rightContainer.current)
+        syncScroll(leftElement, rightElement)
       } else {
         if (isLeftScroll) return
         isRightScroll = true
@@ -28,7 +30,7 @@ export default function SideBySide({ sideBySideContents }) {
         timer = setTimeout(() => {
           isRightScroll = false
         }, 300)
-        syncScroll(rightContainer.current, leftContainer.current)
+        syncScroll(rightElement, leftElement)
       }
     }
     function syncScroll(origin, target) {
@@ -59,13 +61,13 @@ export default function SideBySide({ sideBySideContents }) {
 
     const handleLeftScroll = () => handleScroll('left')
     const handleRightScroll = () => handleScroll('right')
-    leftContainer.current.addEventListener('scroll', handleLeftScroll)
-    rightContainer.current.addEventListener('scroll', handleRightScroll)
+    leftElement.addEventListener('scroll', handleLeftScroll)
+    rightElement.addEventListener('scroll', handleRightScroll)
 
     return () => {
       clearTimeout(timer)
-      leftContainer.current.removeEventListener('scroll', handleLeftScroll)
-      rightContainer.current.removeEventListener('scroll', handleRightScroll)
+      leftElement.removeEventListener('scroll', handleLeftScroll)
+      rightElement.removeEventListener('scroll', handleRightScroll)
     }
   }, [])
 

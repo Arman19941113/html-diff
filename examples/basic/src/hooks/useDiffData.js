@@ -6,7 +6,7 @@ export default function useDiffData({ oldHtml, newHtml }) {
   const [sideBySideContents, setSideBySideContents] = useState(['', ''])
 
   useEffect(() => {
-    const diff = new HtmlDiff(oldHtml, newHtml, 3)
+    const diff = new HtmlDiff(oldHtml, newHtml, { minMatchedSize: 3 })
     setUnifiedContent(diff.getUnifiedContent())
     setSideBySideContents(diff.getSideBySideContents())
   }, [oldHtml, newHtml])
